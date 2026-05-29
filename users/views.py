@@ -7,7 +7,6 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from users.models import CustomUser
 
@@ -19,7 +18,9 @@ from .serializers import (
 )
 
 
-class AuthorizationAPIView(APIView):
+class AuthorizationAPIView(CreateAPIView):
+    serializer_class = AuthValidateSerializer
+
     def post(self, request):
         serializer = AuthValidateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -69,7 +70,9 @@ class RegistrationAPIView(CreateAPIView):
         )
 
 
-class ConfirmUserAPIView(APIView):
+class ConfirmUserAPIView(CreateAPIView):
+    serializer_class = ConfirmationSerializer
+
     def post(self, request):
         serializer = ConfirmationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
