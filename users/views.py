@@ -10,13 +10,14 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import CustomUser
+from users.tasks import add, send_otp_mail
 
 from .models import ConfirmationCode
 from .serializers import (
     AuthValidateSerializer,
     ConfirmationSerializer,
-    RegisterValidateSerializer,
     CustomTokenObtainPairSerializer,
+    RegisterValidateSerializer,
 )
 
 
@@ -28,6 +29,9 @@ class AuthorizationAPIView(CreateAPIView):
     serializer_class = AuthValidateSerializer
 
     def post(self, request):
+        # todo
+        add.delay(10, 9)
+
         serializer = AuthValidateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -69,6 +73,7 @@ class RegistrationAPIView(CreateAPIView):
             code = "".join(random.choices(string.digits, k=6))
 
             confirmation_code = ConfirmationCode.objects.create(user=user, code=code)
+            send_otp_mail.delay(email=email, code=code)
 
         return Response(
             status=status.HTTP_201_CREATED,
